@@ -1,6 +1,6 @@
 # ABSTRACT: 小说站点解析引擎
 package  Tiezi::Robot::Parser;
-our $VERSION = 0.10;
+our $VERSION = 0.11;
 
 sub new {
     my ( $self, %opt) = @_;
@@ -19,14 +19,15 @@ sub detect_site {
 
     my $site =
           ( $url =~ m#^http://bbs\.jjwxc\.net/# )  ? 'HJJ'
+        : ( $url =~ m#^\Qhttp://tieba.baidu.com/# )  ? 'Tieba'
         :                                            'Base';
     return $site;
 } ## end sub detect_site
 
-sub calc_floor_wordnum {
+sub calc_content_wordnum {
     my ($self, $f) = @_;
-    return if(exists $f->{word_num});
-    my $wd = $f->{content};
+    return if($f->{word_num});
+    my $wd = $f->{content} || '';
     $wd =~ s/<[^>]+>//gs;
     $f->{word_num} = $wd =~ s/\S//gs;
     return $f;

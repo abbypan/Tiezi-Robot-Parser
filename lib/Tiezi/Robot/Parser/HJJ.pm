@@ -1,10 +1,10 @@
-#  ABSTRACT:  红晋江的解析模块
+# ABSTRACT: 红晋江的解析模块
 package Tiezi::Robot::Parser::HJJ;
 use strict;
 use warnings;
 use utf8;
 
-use base  'Tiezi::Robot::Parser';
+use base 'Tiezi::Robot::Parser';
 
 use Encode;
 use Web::Scraper;
@@ -146,21 +146,21 @@ sub make_query_request {
 
     my ( $self, $keyword, %opt ) = @_;
     my %qt = (
-        '主题贴内容'    => 1,
-        '跟贴内容'       => 2,
-        '贴子主题'       => 3,
+        '主题贴内容' => 1,
+        '跟贴内容' => 2,
+        '贴子主题' => 3,
         '主题贴发贴人' => 4,
-        '跟贴发贴人'    => 5,
+        '跟贴发贴人' => 5,
     );
     my $q = $opt{query} || 3;
     my $type = exists $qt{ $q } ? $qt{ $q } : $q;
 
     my $url = $BASE . '/search.php?act=search';
     my $post = {
-        'board'   => $opt{board} + 0,
+        'board' => $opt{board} + 0,
         'keyword' => encode( $CHARSET, $keyword ),
-        'topic'   => $type,
-        'submit'  => encode( $CHARSET, '查询' ),
+        'topic' => $type,
+        'submit' => encode( $CHARSET, '查询' ),
     };
 
     return ( $url, $post );
@@ -170,7 +170,7 @@ sub make_query_request {
 sub parse_query_result_urls {
     my ( $self, $html_ref ) = @_;
     my ($page_num) = $$html_ref =~ m[<font color="\#FF0000">(\d+)</font>]s;
-    my ($url)      = $$html_ref =~
+    my ($url) = $$html_ref =~
 m[id="selectpage" onChange="location.href='(.+?)'\+this.value"></select>]s;
     my @urls = map { encode( $CHARSET, "$BASE$url$_" ) }
       ( 2 .. $page_num );
@@ -192,7 +192,7 @@ m[id="selectpage" onChange="location.href='(.+?)'\+this.value"></select>]s;
             #$url = "$BASE/$url";
             #return {
                 #'title' => $title,
-                #url     => encode( $CHARSET, $url )
+                #url => encode( $CHARSET, $url )
             #};
         #};
         #result 'tiezis';
@@ -206,26 +206,26 @@ sub parse_query {
     my ($self, $html_ref) = @_;
     my $parse_query = scraper {
         process '//table[@cellpadding="2"]//tr', 'tiezis[]' => scraper {
-            process_first '//a', 'url'    => '@href';
-            process '//td',      'info[]' => 'TEXT';
+            process_first '//a', 'url' => '@href';
+            process '//td', 'info[]' => 'TEXT';
         };
         result 'tiezis';
     };
-    my $ref  = $parse_query->scrape($html_ref);
+    my $ref = $parse_query->scrape($html_ref);
     my @data = map {
     my $r = $_->{info};
     s/^\s+|\s+$//g for @$r;
     {
-        url    => "$BASE/$_->{url}",
-        title  => $r->[1],
+        url => "$BASE/$_->{url}",
+        title => $r->[1],
         poster => $r->[2],
         time_s => $r->[3],
         time_e => $r->[4],
-        reply  => $r->[5]+0,
-        click  => $r->[6]+0,
+        reply => $r->[5]+0,
+        click => $r->[6]+0,
     }
-    } 
-    grep { $_->{url} }  
+    }
+    grep { $_->{url} }
     @$ref;
     return \@data;
 }
